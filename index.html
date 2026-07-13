@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>複数PF展開整理くん — TRPG/同人の告知まとめ整理ツール</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='88'>&#127922;</text></svg>">
+<style>
+  :root{
+    /* candlelit tome — dark (default) */
+    --ink:#0d0f16; --ink-2:#090b11;
+    --panel:#151823; --panel-2:#1b1f2c; --well:#12151f;
+    --line:#2a3040; --hair:rgba(255,255,255,.055);
+    --tx:#ece7db; --muted:#98a0b2;
+    --brass:#c9a869; --brass-hi:#e6cd8f; --brass-soft:rgba(201,168,105,.14);
+    --grad-brass:linear-gradient(135deg,#e0c184,#c39c53);
+    --ok:#77b493; --ok-soft:rgba(119,180,147,.14);
+    --warn:#e0955a; --warn-soft:rgba(224,149,90,.14);
+    --bad:#dd6a63; --bad-soft:rgba(221,106,99,.14);
+    --focus:rgba(201,168,105,.38);
+    --shadow:0 14px 34px rgba(0,0,0,.42);
+    --shadow-sm:0 4px 14px rgba(0,0,0,.3);
+    --serif:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif;
+    --sans:-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",Meiryo,sans-serif;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      /* aged parchment — light */
+      --ink:#efe8d8; --ink-2:#e6ddc8;
+      --panel:#fbf7ec; --panel-2:#f3ecdb; --well:#f6f0e1;
+      --line:#ddd1b6; --hair:rgba(0,0,0,.04);
+      --tx:#2c261d; --muted:#6d6553;
+      --brass:#9a7a30; --brass-hi:#b7912f; --brass-soft:rgba(154,122,48,.13);
+      --grad-brass:linear-gradient(135deg,#b7912f,#8a6c24);
+      --ok:#3f7d57; --ok-soft:rgba(63,125,87,.12);
+      --warn:#b06a2f; --warn-soft:rgba(176,106,47,.12);
+      --bad:#b4463f; --bad-soft:rgba(180,70,63,.1);
+      --focus:rgba(154,122,48,.32);
+      --shadow:0 12px 30px rgba(90,74,42,.16);
+      --shadow-sm:0 4px 12px rgba(90,74,42,.1);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#0d0f16; --ink-2:#090b11; --panel:#151823; --panel-2:#1b1f2c; --well:#12151f;
+    --line:#2a3040; --hair:rgba(255,255,255,.055); --tx:#ece7db; --muted:#98a0b2;
+    --brass:#c9a869; --brass-hi:#e6cd8f; --brass-soft:rgba(201,168,105,.14);
+    --grad-brass:linear-gradient(135deg,#e0c184,#c39c53);
+    --ok:#77b493; --ok-soft:rgba(119,180,147,.14); --warn:#e0955a; --warn-soft:rgba(224,149,90,.14);
+    --bad:#dd6a63; --bad-soft:rgba(221,106,99,.14); --focus:rgba(201,168,105,.38);
+    --shadow:0 14px 34px rgba(0,0,0,.42); --shadow-sm:0 4px 14px rgba(0,0,0,.3);
+  }
+  :root[data-theme="light"]{
+    --ink:#efe8d8; --ink-2:#e6ddc8; --panel:#fbf7ec; --panel-2:#f3ecdb; --well:#f6f0e1;
+    --line:#ddd1b6; --hair:rgba(0,0,0,.04); --tx:#2c261d; --muted:#6d6553;
+    --brass:#9a7a30; --brass-hi:#b7912f; --brass-soft:rgba(154,122,48,.13);
+    --grad-brass:linear-gradient(135deg,#b7912f,#8a6c24);
+    --ok:#3f7d57; --ok-soft:rgba(63,125,87,.12); --warn:#b06a2f; --warn-soft:rgba(176,106,47,.12);
+    --bad:#b4463f; --bad-soft:rgba(180,70,63,.1); --focus:rgba(154,122,48,.32);
+    --shadow:0 12px 30px rgba(90,74,42,.16); --shadow-sm:0 4px 12px rgba(90,74,42,.1);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ink);color:var(--tx);font-family:var(--sans);
+    line-height:1.72;font-size:15px;-webkit-font-smoothing:antialiased;position:relative;min-height:100vh}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(120% 60% at 50% -8%, var(--brass-soft), transparent 60%);}
+  .topbar{height:3px;background:var(--grad-brass);position:relative;z-index:2}
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px 96px;position:relative;z-index:1}
+
+  /* masthead */
+  .hero{padding:44px 0 26px;text-align:center}
+  .kicker{font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--brass);
+    font-weight:600;margin:0 0 14px;display:inline-flex;align-items:center;gap:10px}
+  .kicker::before,.kicker::after{content:"";width:26px;height:1px;background:var(--brass);opacity:.5}
+  .hero h1{font-family:var(--serif);font-size:clamp(28px,6vw,42px);line-height:1.18;margin:0;
+    font-weight:600;letter-spacing:.01em;text-wrap:balance}
+  .hero .sub{color:var(--muted);font-size:15px;margin:16px auto 0;max-width:34em;text-wrap:balance}
+
+  /* safety note */
+  .safe{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);
+    border-radius:14px;padding:16px 18px 16px 46px;font-size:13.5px;color:var(--muted);
+    margin:6px 0 30px;position:relative;box-shadow:var(--shadow-sm)}
+  .safe::before{content:"";position:absolute;left:16px;top:17px;width:18px;height:18px;
+    background:var(--brass);-webkit-mask:no-repeat center/contain;mask:no-repeat center/contain;
+    -webkit-mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3l7 3v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6z'/></svg>");
+    mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 3l7 3v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6z'/></svg>");}
+  .safe b{color:var(--tx);font-weight:600}
+
+  /* cards */
+  .card{background:linear-gradient(180deg,var(--panel),color-mix(in srgb,var(--panel) 88%, var(--ink)));
+    border:1px solid var(--line);border-radius:18px;padding:24px 24px 26px;margin-bottom:18px;
+    box-shadow:var(--shadow),inset 0 1px 0 var(--hair)}
+  .card h2{font-family:var(--serif);font-size:20px;font-weight:600;margin:0 0 18px;
+    display:flex;align-items:center;gap:12px;letter-spacing:.01em}
+  .num{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+    font-family:var(--serif);font-size:15px;color:var(--ink);background:var(--grad-brass);
+    box-shadow:var(--shadow-sm)}
+  .h2sub{font-family:var(--sans);font-size:12px;font-weight:400;letter-spacing:.04em;
+    color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+
+  /* forms */
+  label{display:block;font-size:12.5px;color:var(--muted);margin:16px 0 6px;letter-spacing:.02em;font-weight:500}
+  .card > label:first-of-type{margin-top:2px}
+  input[type=text],input[type=number],textarea,select{
+    width:100%;background:var(--well);border:1px solid var(--line);border-radius:10px;
+    color:var(--tx);padding:11px 13px;font-size:14.5px;font-family:inherit;
+    transition:border-color .15s, box-shadow .15s}
+  textarea{resize:vertical;min-height:76px;line-height:1.7}
+  input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--muted) 70%,transparent)}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px var(--focus)}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:190px}
+  .sp-row{display:flex;gap:8px;margin-bottom:8px}
+  .sp-row input{flex:1}
+
+  /* buttons */
+  .btn{background:var(--grad-brass);color:var(--ink);border:0;border-radius:10px;padding:11px 18px;
+    font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;letter-spacing:.02em;
+    box-shadow:var(--shadow-sm);transition:transform .12s, box-shadow .12s, filter .12s}
+  .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+  .btn:active{transform:translateY(0)}
+  .btn:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .btn.sm{padding:7px 13px;font-size:12.5px}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--tx);box-shadow:none;font-weight:600}
+  .btn.ghost:hover{border-color:var(--brass);transform:translateY(-1px)}
+  .btn.mini{padding:5px 11px;font-size:12px;font-weight:600;background:var(--panel-2);
+    color:var(--tx);border:1px solid var(--line);box-shadow:none}
+  .btn.mini:hover{border-color:var(--brass);color:var(--brass-hi);transform:none}
+  .gen-btn{width:100%;padding:15px;font-size:16px;margin-top:20px;letter-spacing:.06em}
+
+  /* tabs — segmented control */
+  .tabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:20px;padding:5px;
+    background:var(--well);border:1px solid var(--line);border-radius:14px}
+  .tab{border-radius:9px;padding:8px 14px;font-size:13px;cursor:pointer;color:var(--muted);
+    font-weight:500;transition:color .12s, background .12s;user-select:none}
+  .tab:hover{color:var(--tx)}
+  .tab.active{background:var(--grad-brass);color:var(--ink);font-weight:700;box-shadow:var(--shadow-sm)}
+  .pane{display:none;animation:fade .28s ease both}
+  .pane.active{display:block}
+
+  /* outputs */
+  .out{white-space:pre-wrap;word-break:break-word;background:var(--well);border:1px solid var(--line);
+    border-radius:12px;padding:15px 16px;font-size:14px;line-height:1.78;margin-top:8px}
+  .out-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:20px}
+  .out-head:first-child{margin-top:2px}
+  .out-head h3{font-family:var(--serif);font-size:15px;font-weight:600;margin:0}
+  .counter{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  .counter.over{color:var(--bad);font-weight:700}
+
+  /* badges & states */
+  .badge{display:inline-block;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:999px;
+    margin-left:8px;vertical-align:middle;letter-spacing:.03em}
+  .b-make{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
+  .b-check{background:var(--brass-soft);color:var(--brass);border:1px solid var(--brass)}
+  .b-ok{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok)}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;margin-top:10px;
+    border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  tr>*:last-child{border-right:0}
+  tr:last-child>*{border-bottom:0}
+  th{background:var(--panel-2);color:var(--muted);font-weight:600;letter-spacing:.02em}
+  ul.chk{list-style:none;padding:0;margin:8px 0}
+  ul.chk li{padding:7px 10px;font-size:14px;border-radius:9px;transition:background .12s;display:flex;align-items:center;gap:9px}
+  ul.chk li:hover{background:var(--well)}
+  ul.chk input{width:17px;height:17px;accent-color:var(--brass);margin:0;flex:none}
+  .warn-item{border-left:3px solid var(--warn);padding:9px 13px;margin:8px 0;background:var(--warn-soft);
+    border-radius:0 10px 10px 0;font-size:14px}
+  .ok-item{border-left:3px solid var(--ok);padding:9px 13px;margin:8px 0;background:var(--ok-soft);
+    border-radius:0 10px 10px 0;font-size:14px}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6}
+
+  /* AI清書 */
+  .ai-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+  .ai-bar-label{font-size:12px;color:var(--brass);font-weight:600;letter-spacing:.03em}
+  .ai-bar select{width:auto;flex:1;min-width:200px}
+  .ai-status{font-size:12.5px;color:var(--muted);margin:0 0 14px;line-height:1.55}
+  .ai-status:empty{margin:0}
+  .ai-out{border-color:var(--brass)!important;box-shadow:inset 0 0 0 1px var(--brass-soft)}
+  [data-ai]{white-space:nowrap}
+
+  /* colophon */
+  footer{margin-top:34px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:20px}
+  .colo-title{font-family:var(--serif);color:var(--tx);font-size:14px;margin:0 0 8px;font-weight:600}
+  footer ul{margin:6px 0 14px;padding-left:0;list-style:none}
+  footer li{padding:3px 0 3px 18px;position:relative}
+  footer li::before{content:"—";position:absolute;left:0;color:var(--brass)}
+  .mark{color:var(--brass);font-weight:700;letter-spacing:.16em;font-size:11px}
+  .fb{margin:12px 0;padding:10px 13px;background:var(--brass-soft);border:1px solid var(--brass);
+    border-radius:10px;color:var(--tx);font-size:12.5px}
+  .fb-slot{color:var(--brass);font-weight:600}
+
+  /* toast */
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(8px);
+    background:var(--panel);color:var(--tx);border:1px solid var(--brass);
+    padding:11px 20px;border-radius:999px;font-size:13px;font-weight:600;
+    box-shadow:var(--shadow);opacity:0;transition:opacity .2s, transform .2s;pointer-events:none;z-index:20}
+  .toast::before{content:"✓ ";color:var(--ok);font-weight:700}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  #resultSection{display:none;animation:rise .42s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
+    .btn:hover,.btn.ghost:hover{transform:none}}
+  @media (max-width:520px){.wrap{padding:0 14px 72px}.hero{padding:32px 0 20px}.card{padding:20px 16px 22px}}
+</style>
+</head>
+<body>
+<div class="topbar" aria-hidden="true"></div>
+<div class="wrap">
+  <header class="hero">
+    <p class="kicker">FORGE ／ 制作支援ツール</p>
+    <h1>複数PF展開整理くん</h1>
+    <p class="sub">TRPG・同人の一作を BOOTH・X・note へ出すとき。媒体ごとに違う体裁を、一度の入力でまとめて整えます。</p>
+  </header>
+
+  <div class="safe">
+    <b>自動投稿はしません。</b> 各媒体向けの文章・要件・チェックリストを生成して整理するだけです。できあがった内容をコピーして、ご自身で各媒体に貼ってください。<br>
+    <b>入力したデータは外部に送信されません。</b> すべてこのページの中（あなたのブラウザ内）だけで処理され、保存もされません（ページを閉じると消えます）。
+  </div>
+
+  <!-- 入力 -->
+  <div class="card">
+    <h2><span class="num">1</span>作品情報を入力</h2>
+    <label>作品タイトル <span style="color:var(--bad)">*</span></label>
+    <input type="text" id="title" placeholder="例：忘却の灯台（クトゥルフ神話TRPGシナリオ）">
+
+    <div class="row">
+      <div>
+        <label>ジャンル / カテゴリ <span style="color:var(--bad)">*</span></label>
+        <select id="genre">
+          <option>TRPGシナリオ</option>
+          <option>同人誌</option>
+          <option>画像素材集</option>
+          <option value="__other">その他（自由入力）</option>
+        </select>
+        <input type="text" id="genreOther" placeholder="ジャンルを入力" style="display:none;margin-top:6px">
+      </div>
+      <div>
+        <label>価格（円）<span style="color:var(--bad)">*</span></label>
+        <input type="number" id="price" min="0" step="10" placeholder="例：680（無料なら 0）">
+      </div>
+    </div>
+
+    <label>あらすじ・概要 <span style="color:var(--bad)">*</span>（目安200〜400字）</label>
+    <textarea id="synopsis" placeholder="作品の内容・世界観・見どころを書いてください。ここが各媒体の文章の核になります。"></textarea>
+
+    <label>セールスポイント（特徴・最大5つ）</label>
+    <div id="spList"></div>
+    <button class="btn mini" type="button" id="addSp">＋ 特徴を追加</button>
+
+    <label>対象読者・想定シーン（任意）</label>
+    <textarea id="target" placeholder="例：3〜4人／初心者歓迎／セッション時間4〜5時間／ホラー耐性ある方向け"></textarea>
+
+    <div class="row">
+      <div>
+        <label>既存画像の有無 <span style="color:var(--bad)">*</span></label>
+        <select id="hasImg">
+          <option value="no">なし（これから用意する）</option>
+          <option value="yes">あり</option>
+        </select>
+        <input type="text" id="imgNote" placeholder="あり：枚数・種類の目安（例：表紙1枚・立ち絵2枚）" style="display:none;margin-top:6px">
+      </div>
+      <div>
+        <label>BOOTH商品ページURL（任意）</label>
+        <input type="text" id="url" placeholder="https://xxx.booth.pm/items/xxxx">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>ハッシュタグ候補（任意・カンマ区切り）</label>
+        <input type="text" id="tags" placeholder="例：TRPG, クトゥルフ神話TRPG, 自作シナリオ">
+      </div>
+      <div>
+        <label>トーン</label>
+        <select id="tone">
+          <option value="hot">熱量高め</option>
+          <option value="calm">落ち着いた紹介</option>
+          <option value="plain">簡潔・事務的</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn gen-btn" id="genBtn">この内容でまとめて生成・整理する</button>
+    <p class="hint">※ <span style="color:var(--bad)">*</span> は必須項目です。生成後、下に媒体ごとのタブが出ます。</p>
+  </div>
+
+  <!-- 結果 -->
+  <div id="resultSection">
+    <div class="card">
+      <h2><span class="num">2</span>生成結果<span class="h2sub">タブで切り替え</span></h2>
+      <div class="tabs" id="tabs">
+        <div class="tab active" data-p="booth">BOOTH説明</div>
+        <div class="tab" data-p="x">X告知文</div>
+        <div class="tab" data-p="note">note紹介文</div>
+        <div class="tab" data-p="img">画像・素材一覧</div>
+        <div class="tab" data-p="check">投稿前チェック</div>
+        <div class="tab" data-p="fix">媒体別の修正点</div>
+        <div class="tab" data-p="pkg">公開用パッケージ</div>
+      </div>
+
+      <div id="aiControls">
+        <div class="ai-bar">
+          <span class="ai-bar-label">AI清書エンジン（ブラウザ内・キー不要）</span>
+          <select id="aiModel" aria-label="AIモデル">
+            <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">標準・軽量（Qwen2.5 1.5B／初回DL 約1GB）</option>
+            <option value="Qwen2.5-3B-Instruct-q4f16_1-MLC">高品質・重い（Qwen2.5 3B／初回DL 約2GB）</option>
+          </select>
+        </div>
+        <div id="aiGlobalStatus" class="ai-status"></div>
+      </div>
+
+      <div class="pane active" id="p-booth"></div>
+      <div class="pane" id="p-x"></div>
+      <div class="pane" id="p-note"></div>
+      <div class="pane" id="p-img"></div>
+      <div class="pane" id="p-check"></div>
+      <div class="pane" id="p-fix"></div>
+      <div class="pane" id="p-pkg"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p class="colo-title">このツールがやらないこと（初版）</p>
+    <ul>
+      <li>各媒体への自動投稿（生成した文章は手動でコピペしてください）</li>
+      <li>画像そのものの生成・自動リサイズ（サイズ「要件の一覧」までです。加工はCanva等をお使いください）</li>
+      <li>入力内容の保存（ページを閉じると消えます）／アカウント登録／課金</li>
+    </ul>
+    完全無料・広告なし・データは外部送信なし。TRPG／同人クリエイター向けの実験的ツールです。
+    <div class="fb">使ってみた感想を1分で教えてください（このツールを良くするために集めています）　→　<a class="fb-slot" href="https://docs.google.com/forms/d/e/1FAIpQLSeM8ZR-KpSaYNG2jQpQc_vDFox6GxTaebHT3RKYQUvKbDq4IQ/viewform" target="_blank" rel="noopener">感想アンケート（Googleフォーム・1分）</a></div>
+    <span class="mark">FORGE</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast">コピーしました</div>
+
+<script>
+"use strict";
+
+/* ---------- 画像サイズの静的目安（※一般的な目安。最新の公式仕様は各サービスで要確認） ---------- */
+var IMG_SPECS = [
+  {media:"BOOTH", name:"商品サムネイル/メイン画像", size:"正方形 1200×1200px 目安", note:"一覧では正方形にトリミング表示されるため中央に主役を置く"},
+  {media:"X",     name:"投稿画像（1枚目）",        size:"横長 1600×900px（16:9）目安", note:"タイムラインでは先頭画像が主役。文字は見切れやすいので中央寄せ"},
+  {media:"note",  name:"アイキャッチ（見出し画像）", size:"横長 1280×670px（約1.91:1）目安", note:"記事上部とSNSシェア時のサムネに使われる"}
+];
+
+/* ---------- 特徴入力欄（最大5） ---------- */
+var SP_MAX = 5;
+function addSpRow(val){
+  var list = document.getElementById("spList");
+  if(list.children.length >= SP_MAX) return;
+  var div = document.createElement("div");
+  div.className = "sp-row";
+  var inp = document.createElement("input");
+  inp.type = "text"; inp.placeholder = "例：分岐する結末／初心者GM向けの進行メモ付き";
+  if(val) inp.value = val;
+  var rm = document.createElement("button");
+  rm.className = "btn mini"; rm.type="button"; rm.textContent = "×";
+  rm.onclick = function(){ div.remove(); };
+  div.appendChild(inp); div.appendChild(rm);
+  list.appendChild(div);
+}
+document.getElementById("addSp").onclick = function(){ addSpRow(""); };
+addSpRow(""); // 初期1行
+
+/* ---------- 条件付き入力欄の表示 ---------- */
+document.getElementById("genre").onchange = function(){
+  document.getElementById("genreOther").style.display = (this.value==="__other") ? "block":"none";
+};
+document.getElementById("hasImg").onchange = function(){
+  document.getElementById("imgNote").style.display = (this.value==="yes") ? "block":"none";
+};
+
+/* ---------- 入力収集 ---------- */
+function collect(){
+  var genreSel = document.getElementById("genre").value;
+  var genre = (genreSel==="__other") ? (document.getElementById("genreOther").value.trim()||"作品") : genreSel;
+  var sps = [];
+  document.querySelectorAll("#spList input").forEach(function(i){ if(i.value.trim()) sps.push(i.value.trim()); });
+  var tags = document.getElementById("tags").value.split(",").map(function(t){return t.trim();}).filter(Boolean);
+  return {
+    title: document.getElementById("title").value.trim(),
+    genre: genre,
+    price: document.getElementById("price").value.trim(),
+    synopsis: document.getElementById("synopsis").value.trim(),
+    sps: sps,
+    target: document.getElementById("target").value.trim(),
+    hasImg: document.getElementById("hasImg").value,
+    imgNote: document.getElementById("imgNote").value.trim(),
+    url: document.getElementById("url").value.trim(),
+    tags: tags,
+    tone: document.getElementById("tone").value
+  };
+}
+
+window.forgeCollect = collect; // ブラウザ内AI（module script）から入力を読むため
+
+/* ---------- ユーティリティ ---------- */
+function esc(s){ return (s||""); }
+function priceLabel(p){
+  if(p==="" ) return "[価格未入力]";
+  if(String(p)==="0") return "無料";
+  return "¥"+Number(p).toLocaleString()+"（税込）";
+}
+function urlLabel(u){ return u ? u : "[URLをここに入れてください]"; }
+function toneWord(t){ return t==="hot"?"熱量高め":(t==="calm"?"落ち着いた":"簡潔・事務的"); }
+function trimForX(s,n){ s=s.replace(/\s+/g," ").trim(); return s.length>n ? s.slice(0,n)+"…" : s; }
+function tagStr(tags,sym){ sym=sym||"#"; return tags.map(function(t){return sym+t;}).join(" "); }
+
+/* ---------- 各媒体の生成 ---------- */
+function genBooth(d){
+  var hookMap = {hot:"【頒布中】", calm:"", plain:""};
+  var lines = [];
+  lines.push((hookMap[d.tone]||"")+d.title+"（"+d.genre+"）");
+  lines.push("");
+  lines.push(d.synopsis||"[あらすじ未入力]");
+  if(d.sps.length){
+    lines.push("");
+    lines.push("■ この作品の特徴");
+    d.sps.forEach(function(s){ lines.push("・"+s); });
+  }
+  if(d.target){
+    lines.push("");
+    lines.push("■ 対象・想定");
+    lines.push(d.target);
+  }
+  lines.push("");
+  lines.push("■ 価格："+priceLabel(d.price));
+  if(d.tags.length){ lines.push(""); lines.push(tagStr(d.tags)); }
+  return lines.join("\n");
+}
+
+function genX(d){
+  var syn = trimForX(d.synopsis||"", 60);
+  var tg = d.tags.length ? "\n"+tagStr(d.tags.slice(0,3)) : "";
+  var url = d.url ? "\n"+d.url : "\n[BOOTH URL]";
+  var a = "【頒布中】"+d.title+"（"+d.genre+"）\n"+syn+"\n価格："+priceLabel(d.price)+url+tg;
+  var b = syn+"\n\n…という"+d.genre+"を作りました。『"+d.title+"』"+url+tg;
+  return {a:a, b:b};
+}
+
+function genNotePrompt(d){
+  var toneInstr = {hot:"熱量が伝わる前のめりな",calm:"落ち着いた丁寧な",plain:"簡潔で事務的な"}[d.tone];
+  var p = "あなたはTRPG/同人作品の紹介記事を書くのが得意なライターです。以下の情報をもとに、note向けの紹介記事を"+toneInstr+"トーンで800〜1200字で書いてください。\n\n"
+    + "【見出し構成（この5つで）】\n1. なぜ作ったか\n2. あらすじ\n3. 読みどころ・特徴\n4. 価格と購入方法\n5. ハッシュタグ\n\n"
+    + "【作品情報】\n"
+    + "・タイトル："+d.title+"\n"
+    + "・ジャンル："+d.genre+"\n"
+    + "・あらすじ："+(d.synopsis||"（未入力）")+"\n"
+    + "・特徴："+(d.sps.length?d.sps.join(" / "):"（未入力）")+"\n"
+    + "・対象/想定："+(d.target||"（未入力）")+"\n"
+    + "・価格："+priceLabel(d.price)+"\n"
+    + "・購入URL："+urlLabel(d.url)+"\n"
+    + "・ハッシュタグ："+(d.tags.length?tagStr(d.tags):"（未入力）")+"\n\n"
+    + "【注意】事実にない実績や効果を盛らないこと。誇大表現は避けてください。";
+  return p;
+}
+function genNoteOutline(d){
+  return ["① なぜ作ったか … 制作のきっかけ・込めた思い",
+    "② あらすじ … "+(d.synopsis?trimForX(d.synopsis,50):"（あらすじ未入力）"),
+    "③ 読みどころ・特徴 … "+(d.sps.length?d.sps.join(" / "):"（特徴未入力）"),
+    "④ 価格と購入方法 … "+priceLabel(d.price)+" / "+urlLabel(d.url),
+    "⑤ ハッシュタグ … "+(d.tags.length?tagStr(d.tags):"（未入力）")].join("\n");
+}
+
+/* ---------- 画像・素材一覧 ---------- */
+function renderImg(d){
+  var badge = d.hasImg==="yes"
+    ? '<span class="badge b-check">確認要</span>'
+    : '<span class="badge b-make">要作成</span>';
+  var rows = IMG_SPECS.map(function(s){
+    return "<tr><td>"+s.media+"</td><td>"+s.name+badge+"</td><td>"+s.size+"</td><td>"+s.note+"</td></tr>";
+  }).join("");
+  var head = d.hasImg==="yes"
+    ? "既存画像："+(d.imgNote||"あり")+" → 各媒体のサイズに合っているか<b>確認</b>してください。"
+    : "既存画像なし → 各媒体ぶんの画像を<b>これから用意</b>する必要があります。";
+  return "<p style='font-size:13px;color:var(--muted)'>"+head+"</p>"
+    + "<table><tr><th>媒体</th><th>用途</th><th>推奨サイズ（目安）</th><th>メモ</th></tr>"+rows+"</table>"
+    + "<p class='hint'>※サイズは一般的な目安です。各サービスの最新仕様は公式で一度ご確認ください。</p>";
+}
+
+/* ---------- 投稿前チェックリスト ---------- */
+function renderCheck(d){
+  var items = [
+    {t:"BOOTH：商品説明を貼った", ok:false},
+    {t:"BOOTH：価格を設定した（"+priceLabel(d.price)+"）", ok:(d.price!=="")},
+    {t:"BOOTH：メイン画像を設定した", ok:(d.hasImg==="yes")},
+    {t:"X：告知文が140字以内に収まっている", ok:false},
+    {t:"X：購入URLを入れた", ok:(!!d.url)},
+    {t:"X：画像を添付した", ok:(d.hasImg==="yes")},
+    {t:"X：ハッシュタグを2〜3個に絞った", ok:(d.tags.length>0 && d.tags.length<=3)},
+    {t:"note：紹介記事を書いた", ok:false},
+    {t:"note：アイキャッチ画像を設定した", ok:(d.hasImg==="yes")},
+    {t:"note：BOOTHへのリンクを貼った", ok:(!!d.url)},
+    {t:"全体：3媒体で作品名の表記を統一した", ok:false}
+  ];
+  var lis = items.map(function(it,i){
+    return '<li><input type="checkbox" id="ck'+i+'"'+(it.ok?" checked":"")+'><label for="ck'+i+'" style="display:inline;color:var(--tx);margin:0">'+it.t+'</label></li>';
+  }).join("");
+  return "<p style='font-size:13px;color:var(--muted)'>入力内容から自動で一部チェック済みにしています。残りは投稿しながら確認してください。</p><ul class='chk'>"+lis+"</ul>";
+}
+
+/* ---------- 媒体別の修正点（ルールベース警告） ---------- */
+function fixList(d){
+  var w = [];
+  var synLen = (d.synopsis||"").length;
+  var xaLen = [].concat(Array.from(genX(d).a)).length;
+  if(xaLen>140) w.push("X：告知文（パターンA）が"+xaLen+"字で140字を超えています。あらすじの要約・ハッシュタグ削減・URL短縮などで調整してください（Xタブのカウンターも赤くなっています）。");
+  if(d.tags.length>3) w.push("X：ハッシュタグが"+d.tags.length+"個あります。Xでは2〜3個が読みやすいです（BOOTH/noteでは多めでも可）。");
+  if(d.hasImg==="no") w.push("画像：既存画像が「なし」です。BOOTH・X・note すべてで画像が未作成のため、素材の準備が必要です。");
+  if(!d.url) w.push("導線：BOOTH URLが未入力です。X・noteからBOOTHへ誘導するため、公開後にURLを差し込んでください。");
+  if(d.sps.length===0) w.push("訴求：特徴（セールスポイント）が未入力です。BOOTH説明の訴求力が弱くなりがちなので、1つでも入れることを推奨します。");
+  if(synLen>0 && synLen<80) w.push("note：あらすじが短めです。note記事はある程度の分量があると読まれやすいため、noteは『プロンプト出力』を使って膨らませるのがおすすめです。");
+  if(d.price===""){ w.push("価格：価格が未入力です。各媒体の表記が [価格未入力] になっています。"); }
+  return w;
+}
+function renderFix(d){
+  var w = fixList(d);
+  if(!w.length) return '<div class="ok-item">大きな修正点は見つかりませんでした。投稿前チェックリストで最終確認してください。</div>';
+  return w.map(function(x){ return '<div class="warn-item">'+x+'</div>'; }).join("");
+}
+
+/* ---------- カード描画ヘルパー ---------- */
+function outCard(id, title, text, extraHtml){
+  var head = '<div class="out-head"><h3>'+title+'</h3>'
+    + '<button class="btn mini" data-copy="'+id+'">コピー</button></div>';
+  var body = '<div class="out" id="'+id+'">'+ text.replace(/</g,"&lt;") +'</div>';
+  return head + body + (extraHtml||"");
+}
+
+/* ---------- AI清書ブロック（ブラウザ内AI・キー不要） ---------- */
+function aiBlock(pf, title){
+  return '<div class="out-head"><h3>'+title+'</h3>'
+    + '<button class="btn sm" data-ai="'+pf+'">🎲 AIで清書する</button></div>'
+    + '<div class="out ai-out" id="ai-'+pf+'-out" style="display:none"></div>'
+    + '<div id="ai-'+pf+'-copy" style="display:none;margin-top:8px"><button class="btn mini" data-copy="ai-'+pf+'-out">コピー</button></div>'
+    + "<p class='hint'>ボタンを押すとブラウザ内のAIが文章を清書します（キー不要）。初回だけAIモデルの読み込み（数百MB〜）があり、WebGPU対応ブラウザが必要です。動かない場合は下の簡易版／プロンプトをお使いください。</p>";
+}
+
+/* ---------- メイン生成 ---------- */
+var LAST = null;
+function generate(){
+  var d = collect();
+  if(!d.title || !d.synopsis || d.price==="" ){
+    alert("必須項目（作品タイトル・あらすじ・価格）を入力してください。");
+    return;
+  }
+  LAST = d;
+
+  // BOOTH
+  var booth = genBooth(d);
+  document.getElementById("p-booth").innerHTML =
+    aiBlock("booth","AIで清書した商品説明")
+    + outCard("o-booth","簡易版（AIなし・入力をそのまま整形）", booth,
+      "<p class='hint'>AIが使えない環境でも、この簡易版はそのままBOOTHに貼れます。</p>");
+
+  // X
+  var x = genX(d);
+  var lenA = [].concat(Array.from(x.a)).length, lenB=[].concat(Array.from(x.b)).length;
+  var np = genNotePrompt(d);
+  var xHtml =
+    '<div class="out-head"><h3>パターンA（告知型）</h3><span class="counter '+(lenA>140?"over":"")+'">'+lenA+' / 140字</span></div>'
+    + '<div class="out" id="o-xa">'+x.a.replace(/</g,"&lt;")+'</div>'
+    + '<div style="margin:6px 0 0"><button class="btn mini" data-copy="o-xa">パターンAをコピー</button></div>'
+    + '<div class="out-head"><h3>パターンB（フック型）</h3><span class="counter '+(lenB>140?"over":"")+'">'+lenB+' / 140字</span></div>'
+    + '<div class="out" id="o-xb">'+x.b.replace(/</g,"&lt;")+'</div>'
+    + '<div style="margin:6px 0 0"><button class="btn mini" data-copy="o-xb">パターンBをコピー</button></div>'
+    + '<p class="hint">140字を超えると赤字になります。自動短縮はしないので、ご自身で調整してください。</p>'
+    + outCard("o-xprompt","もっと個性を出したい人向け：Xポスト生成プロンプト（自分のChatGPT/Claudeに貼る）",
+        "以下の情報で、140字以内のTwitter/X告知ポストを3案、"+toneWord(d.tone)+"トーンで作って。誇大表現は避けて。\n\nタイトル："+d.title+"\nジャンル："+d.genre+"\nあらすじ："+(d.synopsis||"")+"\n価格："+priceLabel(d.price)+"\nURL："+urlLabel(d.url)+"\nハッシュタグ："+tagStr(d.tags.slice(0,3)));
+  document.getElementById("p-x").innerHTML = aiBlock("x","AIで告知文を3案 作る") + xHtml;
+
+  // note
+  var noteHtml =
+    outCard("o-noteout","note記事の見出し構成案", genNoteOutline(d))
+    + outCard("o-noteprompt","note紹介文 生成プロンプト（自分のChatGPT/Claudeに貼ると本文ができます）", np,
+        "<p class='hint'>AIが使えない環境向けのフォールバックです。このプロンプトをコピーして、あなた自身のChatGPT/Claudeに貼ると本文が作れます。</p>");
+  document.getElementById("p-note").innerHTML = aiBlock("note","AIで紹介文を生成") + noteHtml;
+
+  // 画像
+  document.getElementById("p-img").innerHTML = renderImg(d);
+  // チェック
+  document.getElementById("p-check").innerHTML = renderCheck(d);
+  // 修正点
+  document.getElementById("p-fix").innerHTML = renderFix(d);
+
+  // パッケージ
+  document.getElementById("p-pkg").innerHTML = buildPackage(d, booth, x, np);
+
+  document.getElementById("resultSection").style.display = "block";
+  document.getElementById("resultSection").scrollIntoView({behavior:"smooth"});
+}
+
+/* ---------- パッケージ（一括） ---------- */
+function buildPackageText(d, booth, x, np){
+  var L = [];
+  L.push("========================================");
+  L.push("複数PF展開パッケージ：「"+d.title+"」");
+  L.push("========================================");
+  L.push("");
+  L.push("--- ① BOOTH向け 商品説明 ---");
+  L.push(booth);
+  L.push("");
+  L.push("--- ② X向け 告知文（パターンA） ---");
+  L.push(x.a);
+  L.push("");
+  L.push("--- ②' X向け 告知文（パターンB） ---");
+  L.push(x.b);
+  L.push("");
+  L.push("--- ③ note紹介文 生成プロンプト ---");
+  L.push(np);
+  L.push("");
+  L.push("--- ④ 画像サイズ・必要素材（目安） ---");
+  IMG_SPECS.forEach(function(s){ L.push("・"+s.media+"："+s.name+" → "+s.size+"（"+s.note+"）"); });
+  L.push("（既存画像："+(d.hasImg==="yes"?("あり "+(d.imgNote||"")):"なし＝要作成")+"）");
+  L.push("");
+  L.push("--- ⑤ 媒体別の修正点 ---");
+  var w = fixList(d);
+  if(w.length){ w.forEach(function(x){ L.push("・"+x); }); } else { L.push("・大きな修正点なし"); }
+  L.push("");
+  L.push("※このツールは自動投稿しません。各内容をコピーして手動で投稿してください。");
+  return L.join("\n");
+}
+function buildPackage(d, booth, x, np){
+  var text = buildPackageText(d, booth, x, np);
+  return '<p style="font-size:13px;color:var(--muted)">①〜⑤をまとめました。ここだけコピー／ダウンロードすれば全媒体ぶんが手元に残ります。</p>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+    + '<button class="btn sm" data-copy="o-pkg">全部まとめてコピー</button>'
+    + '<button class="btn sm ghost" id="dlBtn">テキストで保存</button></div>'
+    + '<div class="out" id="o-pkg">'+text.replace(/</g,"&lt;")+'</div>';
+}
+
+/* ---------- コピー / ダウンロード ---------- */
+function copyText(text){
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(showToast, fallbackCopy.bind(null,text));
+  } else { fallbackCopy(text); }
+}
+function fallbackCopy(text){
+  var ta = document.createElement("textarea");
+  ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand("copy"); showToast(); }catch(e){ alert("コピーに失敗しました。手動で選択してください。"); }
+  document.body.removeChild(ta);
+}
+var toastTimer=null;
+function showToast(){
+  var t=document.getElementById("toast"); t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},1200);
+}
+
+/* イベント委譲：コピーボタン */
+document.addEventListener("click", function(e){
+  var b = e.target.closest("[data-copy]");
+  if(b){
+    var el = document.getElementById(b.getAttribute("data-copy"));
+    if(el) copyText(el.textContent);
+    return;
+  }
+  var ai = e.target.closest("[data-ai]");
+  if(ai){
+    if(window.ForgeAI && window.ForgeAI.generate){ window.ForgeAI.generate(ai.getAttribute("data-ai"), ai); }
+    else { alert("AI機能を準備しています。数秒待ってからもう一度お試しください。"); }
+    return;
+  }
+  if(e.target.id==="dlBtn" && LAST){
+    var booth=genBooth(LAST), x=genX(LAST), np=genNotePrompt(LAST);
+    var text = buildPackageText(LAST, booth, x, np);
+    var blob = new Blob([text], {type:"text/plain;charset=utf-8"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (LAST.title||"package").replace(/[\\/:*?"<>|]/g,"_")+"_展開パッケージ.txt";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(a.href);}, 1000);
+  }
+});
+
+/* タブ切り替え */
+document.getElementById("tabs").addEventListener("click", function(e){
+  var t = e.target.closest(".tab"); if(!t) return;
+  document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});
+  document.querySelectorAll(".pane").forEach(function(x){x.classList.remove("active");});
+  t.classList.add("active");
+  var p = t.getAttribute("data-p");
+  document.getElementById("p-"+p).classList.add("active");
+  var ac = document.getElementById("aiControls");
+  if(ac) ac.style.display = (p==="booth"||p==="x"||p==="note") ? "" : "none";
+});
+
+document.getElementById("genBtn").onclick = generate;
+</script>
+
+<script type="module">
+/* ブラウザ内AI（WebLLM / WebGPU）— APIキー・サーバー不要。初回のみモデルDL。 */
+(function(){
+  "use strict";
+  var engine=null, loadedModel=null, lib=null, busy=false;
+  function statusEl(){ return document.getElementById("aiGlobalStatus"); }
+  function setStatus(t){ var s=statusEl(); if(s) s.textContent=t||""; }
+  function toneWord(t){ return t==="hot"?"熱量が伝わる前のめりな":(t==="calm"?"落ち着いた丁寧な":"簡潔で事務的な"); }
+
+  async function loadLib(){
+    if(lib) return lib;
+    lib = await import("https://esm.run/@mlc-ai/web-llm");
+    return lib;
+  }
+  async function ensureEngine(model){
+    if(engine && loadedModel===model) return engine;
+    if(!navigator.gpu){ var e=new Error("NO_WEBGPU"); e.code="NO_WEBGPU"; throw e; }
+    var L = await loadLib();
+    setStatus("AIモデルを準備中…（初回はダウンロードがあります。少しお待ちください）");
+    engine = await L.CreateMLCEngine(model, { initProgressCallback:function(p){ setStatus("準備中… "+((p&&p.text)||"")); } });
+    loadedModel = model;
+    setStatus("AIの準備ができました。");
+    return engine;
+  }
+  function messagesFor(pf, d){
+    var priceTxt = (String(d.price)==="0") ? "無料" : ("¥"+d.price);
+    var base = "作品タイトル："+d.title+"\nジャンル："+d.genre+"\nあらすじ："+d.synopsis
+      + "\n特徴："+(d.sps.length?d.sps.join(" / "):"（なし）")
+      + "\n対象・想定："+(d.target||"（なし）")
+      + "\n価格："+priceTxt+"\n購入URL："+(d.url||"（未設定）")
+      + "\nハッシュタグ："+(d.tags.length?d.tags.map(function(t){return "#"+t;}).join(" "):"（なし）")
+      + "\n書き味："+toneWord(d.tone);
+    var task;
+    if(pf==="booth") task="上記をもとに、BOOTHの商品説明文を清書してください。フック→あらすじ→特徴→対象→価格案内の自然な流れで、読み手の購買意欲が高まるように仕上げます。";
+    else if(pf==="x") task="上記をもとに、X（Twitter）の告知ポストを3案作ってください。各案は必ず140字以内。ハッシュタグとURLも140字に含めます。案と案の間は「---」で区切ってください。";
+    else task="上記をもとに、noteの紹介記事を800〜1200字で書いてください。見出しは「なぜ作ったか」「あらすじ」「読みどころ・特徴」「価格と購入方法」「ハッシュタグ」の5つです。";
+    var sys = "あなたは同人・TRPG作品の紹介文を書く日本語のプロ編集者です。入力にない事実（実績・受賞・効果・数値など）を創作せず、誇大表現を避け、自然で読みやすい日本語で書きます。前置きや説明は書かず、本文だけを出力します。";
+    return [{role:"system",content:sys},{role:"user",content:base+"\n\n【依頼】"+task}];
+  }
+  async function generate(pf, btn){
+    if(busy){ return; }
+    var d = window.forgeCollect ? window.forgeCollect() : null;
+    if(!d || !d.title || !d.synopsis){ alert("先に作品情報（タイトル・あらすじ）を入力して「まとめて生成」を押してください。"); return; }
+    var model = (document.getElementById("aiModel")||{}).value || "Qwen2.5-1.5B-Instruct-q4f16_1-MLC";
+    var out = document.getElementById("ai-"+pf+"-out");
+    var copyWrap = document.getElementById("ai-"+pf+"-copy");
+    var label = btn.textContent;
+    busy=true; btn.disabled=true; btn.textContent="生成中…";
+    if(out){ out.style.display="block"; out.textContent=""; }
+    try{
+      var eng = await ensureEngine(model);
+      var stream = await eng.chat.completions.create({ messages: messagesFor(pf,d), stream:true, temperature:0.7 });
+      var acc="";
+      for await (const ch of stream){
+        var t = ch && ch.choices && ch.choices[0] && ch.choices[0].delta ? (ch.choices[0].delta.content||"") : "";
+        acc += t; if(out) out.textContent = acc;
+      }
+      if(copyWrap) copyWrap.style.display = "block";
+      setStatus("生成が完了しました。別タブ（BOOTH/X/note）でも同じAIをそのまま使えます。");
+    }catch(err){
+      if(out){
+        out.style.display="block";
+        if(err && err.code==="NO_WEBGPU"){
+          out.textContent = "このブラウザはブラウザ内AI（WebGPU）に未対応のため、AI清書を実行できません。\n\n・Chrome / Edge の最新版などWebGPU対応ブラウザでお試しください。\n・または、このタブ下部にある「AIに貼るプロンプト」をコピーして、ChatGPTやClaudeに貼っても同じ文章が作れます。";
+        } else {
+          out.textContent = "AIの読み込み／生成でエラーが発生しました。\n（"+(err&&err.message?err.message:err)+"）\n\n初回はモデルのダウンロードにネット接続が必要です。接続状況とブラウザ（WebGPU対応）をご確認のうえ、もう一度お試しください。";
+        }
+      }
+      setStatus("");
+    }finally{
+      busy=false; btn.disabled=false; btn.textContent=label;
+    }
+  }
+  window.ForgeAI = { generate: generate };
+  if(!navigator.gpu){
+    setStatus("※このブラウザはブラウザ内AI（WebGPU）に未対応です。AI清書は Chrome / Edge 最新版などでご利用いただけます（簡易版とプロンプトはこのままお使いいただけます）。");
+  }
+})();
+</script>
+</body>
+</html>
